@@ -28,7 +28,7 @@ export async function streamToAgent({
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Failed to connect: ${response.status} - ${errorText}`);
-  } else onResponse?.();
+  } else onResponse?.()
 
   if (!response.body) {
     throw new Error("No response stream");
@@ -46,39 +46,24 @@ export async function streamToAgent({
       const chunk = decoder.decode(value, { stream: true });
       buffer += chunk;
 
-      // Process complete lines ending with \n\n
+      console.log("------Buffer-------", buffer)
+
       const lines = buffer.split("\n\n");
-      
-      // Keep the last incomplete line in buffer
       buffer = lines.pop() || "";
 
+      console.log("------lines-------", lines)
       for (const line of lines) {
-        if (line.trim()) {
-          // Handle both "data: " and "\ndata: " prefixes
-          const cleanLine = line.replace(/^\n?data:\s*/, "");
-          
-          if (cleanLine === "[DONE]") {
+        if (line.startsWith("data: ") || line.startsWith("\ndata")) {
+          const content = line.slice(6); // removes "data: " prefix and whitespace
+          // console.log(content, "---------content---------")
+          if (content === "[DONE]") {
             onComplete();
             return;
           }
-          
-          // Only process non-empty content
-          if (cleanLine.trim()) {
-            onChunk(cleanLine);
-          }
+          onChunk(content);
         }
       }
     }
-
-    // Process any remaining content in buffer
-    if (buffer.trim()) {
-      const cleanBuffer = buffer.replace(/^\n?data:\s*/, "");
-      if (cleanBuffer.trim() && cleanBuffer !== "[DONE]") {
-        onChunk(cleanBuffer);
-      }
-    }
-
-    onComplete();
   } catch (err) {
     console.error("Stream read error:", err);
     throw err;
