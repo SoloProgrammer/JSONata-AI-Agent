@@ -41,64 +41,159 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
   const renderContent = (content: string) => {
     if (!content) return null;
 
-    // Split content by code blocks
-    const parts = content.split(/(```[\s\S]*?```)/g);
+    // Enhanced regex to better detect code blocks with proper language detection
+    const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
+    const parts: Array<{ type: 'text' | 'code'; content: string; language?: string }> = [];
+    let lastIndex = 0;
+    let match;
 
-    // console.log("parts--", parts)
-
-    return parts
-      .map((part, index) => {
-        if (part.startsWith("```") && part.endsWith("```")) {
-          // Extract language and code
-          const lines = part.slice(3, -3).split(" ");
-          const language = lines[0] || "javascript";
-          const code = lines.slice(1).join("");
-
-          return (
-            <div key={index} className="my-4 relative group">
-              <div className="flex items-center justify-between bg-gray-800 dark:bg-gray-900 px-4 py-2 rounded-t-lg border border-gray-700">
-                <Badge variant="secondary" className="text-xs bg-gray-700 dark:bg-gray-800 text-gray-300 dark:text-gray-400">
-                  {language}
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(code, index)}
-                  className="h-8 w-8 p-0 hover:bg-gray-600 dark:hover:bg-gray-700 text-gray-400 hover:text-white dark:hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  {copiedIndex === index ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </Button>
-              </div>
-              <div className="overflow-x-auto">
-                <SyntaxHighlighter
-                  language={language}
-                  style={theme === "dark" ? dracula : oneLight}
-                  className="rounded-b-lg !mt-0 border border-t-0 border-gray-700 dark:border-gray-600"
-                  customStyle={{
-                    margin: 0,
-                    borderTopLeftRadius: 0,
-                    borderTopRightRadius: 0,
-                    maxWidth: "100%",
-                    backgroundColor: theme === "dark" ? "#1a1a1a" : "#f8f9fa",
-                  }}
-                  wrapLongLines={true}
-                >
-                  {code}
-                </SyntaxHighlighter>
-              </div>
-            </div>
-          );
-        } else if (part) {
-          // Regular text - only render if not empty
-          return (
-            <div key={index} className="whitespace-pre-wrap break-words">
-              <Markdown>{part}</Markdown>
-            </div>
-          );
+    // Extract code blocks and text parts
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+      // Add text before code block
+      if (match.index > lastIndex) {
+        const textContent = content.slice(lastIndex, match.index).trim();
+        if (textContent) {
+          parts.push({ type: 'text', content: textContent });
         }
-        return null;
-      })
-      .filter(Boolean);
+      }
+
+      // Add code block
+      const language = match[1] || 'text';
+      const code = match[2].trim();
+      if (code) {
+        parts.push({ type: 'code', content: code, language });
+      }
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text after last code block
+    if (lastIndex < content.length) {
+      const remainingText = content.slice(lastIndex).trim();
+      if (remainingText) {
+        parts.push({ type: 'text', content: remainingText });
+      }
+    }
+
+    // If no code blocks found, treat entire content as text
+    if (parts.length === 0) {
+      parts.push({ type: 'text', content: content });
+    }
+
+    return parts.map((part, index) => {
+      if (part.type === 'code') {
+        return (
+          <div key={index} className="my-4 relative group">
+            <div className="flex items-center justify-between bg-gray-800 dark:bg-gray-900 px-4 py-2 rounded-t-lg border border-gray-700">
+              <Badge variant="secondary" className="text-xs bg-gray-700 dark:bg-gray-800 text-gray-300 dark:text-gray-400">
+                {part.language}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(part.content, index)}
+                className="h-8 w-8 p-0 hover:bg-gray-600 dark:hover:bg-gray-700 text-gray-400 hover:text-white dark:hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                {copiedIndex === index ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </Button>
+            </div>
+            <div className="overflow-x-auto">
+              <SyntaxHighlighter
+                language={part.language}
+                style={theme === "dark" ? dracula : oneLight}
+                className="rounded-b-lg !mt-0 border border-t-0 border-gray-700 dark:border-gray-600"
+                customStyle={{
+                  margin: 0,
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                  maxWidth: "100%",
+                  backgroundColor: theme === "dark" ? "#1a1a1a" : "#f8f9fa",
+                  fontSize: "14px",
+                  lineHeight: "1.5",
+                }}
+                wrapLines={true}
+                wrapLongLines={true}
+                showLineNumbers={part.content.split('\n').length > 5}
+                lineNumberStyle={{
+                  minWidth: "3em",
+                  paddingRight: "1em",
+                  color: theme === "dark" ? "#6b7280" : "#9ca3af",
+                  borderRight: `1px solid ${theme === "dark" ? "#374151" : "#e5e7eb"}`,
+                  marginRight: "1em",
+                }}
+              >
+                {part.content}
+              </SyntaxHighlighter>
+            </div>
+          </div>
+        );
+      } else {
+        // Regular text with proper markdown rendering
+        return (
+          <div key={index} className="prose prose-sm dark:prose-invert max-w-none">
+            <Markdown
+              components={{
+                // Custom rendering for inline code
+                code: ({ node, inline, className, children, ...props }) => {
+                  if (inline) {
+                    return (
+                      <code
+                        className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono border border-gray-200 dark:border-gray-700"
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    );
+                  }
+                  return <code {...props}>{children}</code>;
+                },
+                // Ensure proper paragraph spacing
+                p: ({ children }) => (
+                  <p className="mb-3 last:mb-0 leading-relaxed whitespace-pre-wrap break-words">
+                    {children}
+                  </p>
+                ),
+                // Style lists properly
+                ul: ({ children }) => (
+                  <ul className="list-disc list-inside mb-3 space-y-1">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal list-inside mb-3 space-y-1">
+                    {children}
+                  </ol>
+                ),
+                // Style headings
+                h1: ({ children }) => (
+                  <h1 className="text-xl font-bold mb-3 mt-4 first:mt-0">
+                    {children}
+                  </h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-lg font-semibold mb-2 mt-3 first:mt-0">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-base font-medium mb-2 mt-3 first:mt-0">
+                    {children}
+                  </h3>
+                ),
+                // Style blockquotes
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-3">
+                    {children}
+                  </blockquote>
+                ),
+              }}
+            >
+              {part.content}
+            </Markdown>
+          </div>
+        );
+      }
+    });
   };
 
   const isUser = message.role === "user";
