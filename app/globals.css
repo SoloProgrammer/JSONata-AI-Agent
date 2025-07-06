@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 263 70% 50%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263 70% 50%;
+    --chart-1: 263 70% 50%;
+    --chart-2: 280 65% 60%;
+    --chart-3: 290 70% 55%;
+    --chart-4: 300 75% 60%;
+    --chart-5: 310 80% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Dark Mode Styles */
+.dark {
+  /* Purple-themed dark background gradients */
+  --gradient-bg: linear-gradient(135deg, 
+    hsl(240, 10%, 3.9%) 0%, 
+    hsl(250, 15%, 5%) 25%, 
+    hsl(260, 20%, 4%) 50%, 
+    hsl(270, 15%, 3%) 75%, 
+    hsl(240, 10%, 3.9%) 100%);
+  
+  /* Shine black with purple undertones */
+  --card-bg: linear-gradient(135deg, 
+    hsl(240, 8%, 8%) 0%, 
+    hsl(250, 12%, 6%) 50%, 
+    hsl(240, 8%, 8%) 100%);
+  
+  /* Light gray borders with purple tint */
+  --border-glow: 0 0 0 1px hsla(260, 30%, 80%, 0.1);
+  --border-hover: 0 0 0 1px hsla(260, 50%, 70%, 0.2);
+}
+
+/* Dark mode background */
+.dark .bg-gradient-to-br {
+  background: var(--gradient-bg) !important;
+}
+
+/* Dark mode cards with shine effect */
+.dark .bg-white\/60 {
+  background: var(--card-bg) !important;
+  border: 1px solid hsl(240, 3.7%, 15.9%);
+  box-shadow: var(--border-glow), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.dark .bg-white\/80 {
+  background: linear-gradient(135deg, 
+    hsl(240, 8%, 10%) 0%, 
+    hsl(250, 12%, 8%) 100%) !important;
+  border-color: hsl(240, 3.7%, 15.9%);
+  box-shadow: var(--border-glow);
+}
+
+/* Dark mode hover effects */
+.dark .hover\:bg-gray-100:hover {
+  background-color: hsl(240, 3.7%, 15.9%) !important;
+}
+
+.dark .hover\:border-gray-400:hover {
+  border-color: hsl(260, 30%, 25%) !important;
+  box-shadow: var(--border-hover);
+}
+
+/* Dark mode input styling */
+.dark .border-gray-300 {
+  border-color: hsl(240, 3.7%, 15.9%);
+  background: hsl(240, 8%, 8%);
+}
+
+.dark .focus\:border-blue-500:focus {
+  border-color: hsl(263, 70%, 50%);
+  box-shadow: 0 0 0 3px hsla(263, 70%, 50%, 0.1);
+}
+
+/* Dark mode text colors */
+.dark .text-gray-900 {
+  color: hsl(0, 0%, 98%);
+}
+
+.dark .text-gray-500 {
+  color: hsl(240, 5%, 64.9%);
+}
+
+.dark .text-gray-600 {
+  color: hsl(240, 5%, 64.9%);
+}
+
+/* Dark mode badges and accents */
+.dark .bg-emerald-100 {
+  background-color: hsl(150, 60%, 15%);
+  border-color: hsl(150, 50%, 25%);
+}
+
+.dark .text-emerald-700 {
+  color: hsl(150, 60%, 70%);
+}
+
+.dark .border-emerald-200 {
+  border-color: hsl(150, 50%, 25%);
+}
+
+.dark .bg-emerald-50 {
+  background-color: hsl(150, 60%, 8%);
+  border-color: hsl(150, 50%, 20%);
+}
+
+.dark .text-emerald-600 {
+  color: hsl(150, 55%, 65%);
+}
+
+/* Dark mode purple gradients for buttons */
+.dark .bg-gradient-to-r.from-blue-500.to-indigo-600 {
+  background: linear-gradient(to right, 
+    hsl(263, 70%, 50%), 
+    hsl(270, 75%, 55%)) !important;
+}
+
+.dark .hover\:from-blue-600.hover\:to-indigo-700:hover {
+  background: linear-gradient(to right, 
+    hsl(263, 75%, 45%), 
+    hsl(270, 80%, 50%)) !important;
+}
+
+/* Dark mode message styling */
+.dark .bg-gradient-to-br.from-blue-500.to-indigo-600 {
+  background: linear-gradient(135deg, 
+    hsl(263, 70%, 50%), 
+    hsl(270, 75%, 55%)) !important;
+}
+
+.dark .bg-gradient-to-br.from-emerald-500.to-green-600 {
+  background: linear-gradient(135deg, 
+    hsl(280, 70%, 50%), 
+    hsl(290, 75%, 55%)) !important;
+}
+
+/* Dark mode scrollbar */
+
+.dark ::-webkit-scrollbar-track {
+  background: hsl(240, 8%, 8%);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(240, 3.7%, 25%);
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(260, 30%, 35%);
+}
+
+/* Glow effects for dark mode */
+.dark .shadow-lg {
+  box-shadow: 
+    var(--border-glow),
+    0 10px 15px -3px rgba(0, 0, 0, 0.4),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .shadow-sm {
+  box-shadow: 
+    var(--border-glow),
+    0 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
