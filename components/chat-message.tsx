@@ -134,18 +134,21 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
             <Markdown
               components={{
                 // Custom rendering for inline code
-                code: ({ node, inline, className, children, ...props }) => {
-                  if (inline) {
+                code: (props) => {
+                  const { children, className, ...rest } = props;
+                  const isInline = !className || !className.includes('language-');
+                  
+                  if (isInline) {
                     return (
                       <code
                         className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono border border-gray-200 dark:border-gray-700"
-                        {...props}
+                        {...rest}
                       >
                         {children}
                       </code>
                     );
                   }
-                  return <code {...props}>{children}</code>;
+                  return <code {...rest}>{children}</code>;
                 },
                 // Ensure proper paragraph spacing
                 p: ({ children }) => (
