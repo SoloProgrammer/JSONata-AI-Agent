@@ -107,6 +107,7 @@ export function ChatInterface() {
         history: messages,
         onResponse: () => {
           setMessages((prev) => prev.filter((m) => m.id !== AgentThinkingId));
+          setJsonContext(null)
         },
         onChunk: (chunk: string) => {
           fullResponse += chunk;
@@ -129,7 +130,7 @@ export function ChatInterface() {
     } catch (error) {
       console.error("Error sending message:", error);
       setMessages((prev) => [
-        ...prev,
+        ...prev.filter((m) => m.id !== AgentThinkingId),
         {
           id: (Date.now() + 1).toString(),
           role: "assistant",

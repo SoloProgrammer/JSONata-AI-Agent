@@ -236,25 +236,6 @@ class AzureAIAgentsService {
 
       const streamEventMessages = await this.client.runs.create(thread.id, AZURE_AI_AGENT_ID).stream();
 
-      // Process the stream
-      // for await (const event of streamEventMessages) {
-      //   console.log(event.event, "event.event")
-      //   if (event.event === "thread.message.delta") {
-      //     const msg = event.data
-      //     console.log("Message from Ai agent: -------", (msg as MessageDeltaChunk).delta)
-      //     // onChunk(msg);
-      //   } else if (event.event === "thread.run.completed") {
-      //     onComplete();
-      //     break;
-      //   } else if (event.event === "thread.run.failed") {
-      //     console.error("Run failed:", event.data);
-      //     onChunk("\n\n❌ **Error**: The agent run failed. Please try again.");
-
-      //     onComplete();
-      //     break;
-      //   }
-      // }
-
       for await (const eventMessage of streamEventMessages) {
         switch (eventMessage.event) {
           case RunStreamEvent.ThreadRunCreated:
