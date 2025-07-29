@@ -1,19 +1,19 @@
+import { Api_endpoints } from "@/static/keys";
+
 export async function streamToAgent({
   message,
   jsonContext,
-  history,
   onChunk,
   onComplete,
   onResponse,
 }: {
   message: string;
   jsonContext: any;
-  history: any[];
   onChunk: (chunk: string) => void;
   onComplete: () => void;
   onResponse?: () => void;
 }) {
-  const response = await fetch("/api/stream-chat", {
+  const response = await fetch(Api_endpoints.streamChat, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -21,7 +21,6 @@ export async function streamToAgent({
     body: JSON.stringify({
       message,
       jsonContext,
-      history,
     }),
   });
 

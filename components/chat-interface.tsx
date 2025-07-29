@@ -2,35 +2,22 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { MessageSquare, Upload, Code, Send, FileText, Sparkles, AlertCircle, CheckCircle, Database } from "lucide-react";
+import { MessageSquare, Code, Send, FileText, Sparkles, AlertCircle, CheckCircle } from "lucide-react";
 import { ChatMessage } from "./chat-message";
 import { JsonUpload } from "./json-upload";
 import { ThemeToggle } from "./theme-toggle";
 import axios from "axios";
 import { streamToAgent } from "@/lib/stream-to-agent";
 import TextareaAutosize from "react-textarea-autosize";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-  jsonContext?: any;
-}
-
-type ConnectionResponse = {
-  success: boolean;
-  message: string;
-};
-
-export const AgentThinkingId = "agent-think-01";
+import { Message, ConnectionResponse } from "@/types/types";
+import { Api_endpoints } from "@/static/keys";
+import { AgentThinkingId, AgentThinkingMessage, AgentRole, UserRole } from "@/static/constants";
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -39,7 +26,6 @@ export function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState("");
   const [connectionStatus, setConnectionStatus] = useState<"unknown" | "testing" | "connected" | "error">("unknown");
-  const [vectorStoreStatus, setVectorStoreStatus] = useState<"none" | "creating" | "ready" | "error">("none");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const JSONcontextInputRef = useRef<null | HTMLTextAreaElement>(null);
@@ -57,7 +43,7 @@ export function ChatInterface() {
     const checkConnection = async () => {
       try {
         setConnectionStatus("testing");
-        const { data: result } = await axios.get<ConnectionResponse>("api/test-connection");
+        const { data: result } = await axios.get<ConnectionResponse>(Api_endpoints.testConnection);
         setConnectionStatus("connected");
         if (!result.success) {
           console.warn("Azure AI Agents connection test failed:", result.message);
@@ -71,12 +57,14 @@ export function ChatInterface() {
     checkConnection();
   }, []);
 
+  console.log("jsonContext", jsonContext);
+
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      role: "user",
+      role: UserRole,
       content: input,
       timestamp: new Date(),
       jsonContext: jsonContext,
@@ -84,8 +72,8 @@ export function ChatInterface() {
 
     const AgentThinkingMesssage: Message = {
       id: AgentThinkingId,
-      role: "assistant",
-      content: "Agent is Thinking",
+      role: AgentRole,
+      content: AgentThinkingMessage,
       timestamp: new Date(),
     };
 
@@ -104,7 +92,6 @@ export function ChatInterface() {
       await streamToAgent({
         message: input,
         jsonContext,
-        history: messages,
         onResponse: () => {
           setMessages((prev) => prev.filter((m) => m.id !== AgentThinkingId));
           setJsonContext(null)
@@ -117,7 +104,7 @@ export function ChatInterface() {
           // On complete, add the final message to the messages array
           const finalMessage: Message = {
             id: assistantMessageId,
-            role: "assistant",
+            role: AgentRole,
             content: fullResponse,
             timestamp: new Date(),
           };
@@ -133,7 +120,7 @@ export function ChatInterface() {
         ...prev.filter((m) => m.id !== AgentThinkingId),
         {
           id: (Date.now() + 1).toString(),
-          role: "assistant",
+          role: AgentRole,
           content:
             "Sorry, I encountered an error while connecting to the Azure AI Agents service. Please check your configuration and try again.",
           timestamp: new Date(),
@@ -196,45 +183,6 @@ export function ChatInterface() {
     }
   };
 
-  const getVectorStoreStatusBadge = () => {
-    if (vectorStoreStatus === "none") return null;
-
-    switch (vectorStoreStatus) {
-      case "creating":
-        return (
-          <Badge
-            variant="secondary"
-            className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700/50"
-          >
-            <div className="w-3 h-3 mr-1 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-            Creating Vector Store
-          </Badge>
-        );
-      case "ready":
-        return (
-          <Badge
-            variant="secondary"
-            className="bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700/50"
-          >
-            <Database className="w-3 h-3 mr-1" />
-            Vector Store Ready
-          </Badge>
-        );
-      case "error":
-        return (
-          <Badge
-            variant="secondary"
-            className="bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700/50"
-          >
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Vector Store Error
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Header */}
@@ -252,7 +200,6 @@ export function ChatInterface() {
             </div>
             <div className="flex items-center space-x-3">
               {getConnectionStatusBadge()}
-              {getVectorStoreStatusBadge()}
               <ThemeToggle />
             </div>
           </div>
@@ -348,7 +295,7 @@ export function ChatInterface() {
                         <ChatMessage
                           message={{
                             id: "streaming",
-                            role: "assistant",
+                            role: AgentRole,
                             content: currentStreamingMessage,
                             timestamp: new Date(),
                           }}

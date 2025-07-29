@@ -6,25 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Check, User, Bot } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus, oneLight, dracula } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { oneLight, dracula } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { useTheme } from "next-themes";
 import Markdown from "react-markdown";
-import { AgentThinkingId } from "./chat-interface";
+import { AgentThinkingId, UserRole } from "@/static/constants";
+import { Message } from "@/types/types";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-  jsonContext?: any;
-}
-
-interface ChatMessageProps {
-  message: Message;
-  isStreaming?: boolean;
-}
-
-export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) {
+export function ChatMessage({ message, isStreaming = false }: { message: Message; isStreaming?: boolean }) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const { theme } = useTheme();
 
@@ -44,7 +32,6 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
     // Split content by code blocks
     const parts = content.split(/(```[\s\S]*?```)/g);
 
-    // console.log("parts--", parts)
 
     return parts
       .map((part, index) => {
@@ -53,7 +40,6 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
           const lines = part.slice(3, -3).split(" ");
           const language = lines[0] || "javascript";
           const code = lines.slice(1).join("");
-
           return (
             <div key={index} className="my-4 relative group">
               <div className="flex items-center justify-between bg-gray-800 dark:bg-gray-900 px-4 py-2 rounded-t-lg border border-gray-700">
@@ -103,7 +89,8 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
       .filter(Boolean);
   };
 
-  const isUser = message.role === "user";
+  const isUser = message.role === UserRole;
+  const AgentThinking = message.id === AgentThinkingId;
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
@@ -132,10 +119,10 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
           <div className="p-4">
             {message.content && (
               <div className={`text-sm ${isUser ? "text-white" : "text-gray-900 dark:text-gray-100"} overflow-hidden`}>
-                {message.id !== AgentThinkingId && renderContent(message.content)}
+                {!AgentThinking && renderContent(message.content)}
                 <span className="flex items-center gap-1">
-                  {message.id === AgentThinkingId && renderContent(message.content)}
-                  {message.id === AgentThinkingId && (
+                  {AgentThinking && renderContent(message.content)}
+                  {AgentThinking && (
                     <img width={30} src="https://cdn.pixabay.com/animation/2024/04/02/07/57/07-57-40-974_512.gif" alt="thinking..." />
                   )}
                 </span>

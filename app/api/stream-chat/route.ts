@@ -3,7 +3,7 @@ import { azureAIAgentsService } from "@/services/azure-ai-agents-service.service
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { message, jsonContext, history } = await req.json();
+  const { message, jsonContext } = await req.json();
 
   const encoder = new TextEncoder();
 
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         controller.close();
       };
 
-      await azureAIAgentsService.streamChatResponse(message, jsonContext, history, push, end);
+      await azureAIAgentsService.streamChatResponse(message, jsonContext, push, end);
     },
   });
 
