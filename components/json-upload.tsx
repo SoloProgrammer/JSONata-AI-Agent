@@ -7,9 +7,10 @@ import { Upload, FileText, X, CheckCircle } from 'lucide-react';
 
 interface JsonUploadProps {
   onJsonLoaded: (json: any) => void;
+  jsonContext: any;
 }
 
-export function JsonUpload({ onJsonLoaded }: JsonUploadProps) {
+export function JsonUpload({ onJsonLoaded, jsonContext }: JsonUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isValid, setIsValid] = useState(false);
@@ -63,9 +64,10 @@ export function JsonUpload({ onJsonLoaded }: JsonUploadProps) {
   };
 
   useEffect(() => {
-    console.log("Component mounted")
-    return () => console.log("Component unmounted")
-  },[])
+    if(!jsonContext){
+      clearFile();
+    }
+  },[jsonContext])
 
   return (
     <div className="space-y-4">

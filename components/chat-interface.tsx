@@ -229,7 +229,7 @@ export function ChatInterface() {
                     </TabsTrigger>
                   </TabsList>
                   <TabsContent value="upload" className="space-y-4 flex-1 overflow-auto">
-                    <JsonUpload onJsonLoaded={setJsonContext} />
+                    <JsonUpload onJsonLoaded={setJsonContext} jsonContext={jsonContext} />
                   </TabsContent>
                   <TabsContent value="paste" className="space-y-4 flex-1 overflow-hidden flex flex-col">
                     <Textarea

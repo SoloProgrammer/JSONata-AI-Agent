@@ -39,7 +39,7 @@ export function ChatMessage({ message, isStreaming = false }: { message: Message
           // Extract language and code
           const lines = part.slice(3, -3).split(" ");
           const language = lines[0] || "javascript";
-          const code = lines.slice(1).join("");
+          const code = lines.slice(1).join("").replaceAll("and", " and ").replaceAll("not", " not ");
           return (
             <div key={index} className="my-4 relative group">
               <div className="flex items-center justify-between bg-gray-800 dark:bg-gray-900 px-4 py-2 rounded-t-lg border border-gray-700">
